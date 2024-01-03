@@ -1,0 +1,2 @@
+add rule inet filter arp_rate_limit arp operation reply limit rate over 5/minute burst 2 packets counter drop
+add rule inet filter input ct state established,related counter accept

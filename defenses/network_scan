@@ -1,0 +1,4 @@
+# drop icmp
+add rule inet filter forward ip protocol icmp drop
+# limit ARP
+add rule inet filter forward arp operation request limit rate over 5/minute burst 2 packets counter drop

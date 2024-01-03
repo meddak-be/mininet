@@ -1,0 +1,28 @@
+add table inet filter
+add chain inet filter input { type filter hook input priority 0; }
+add chain inet filter forward { type filter hook forward priority 0; }
+add chain inet filter output { type filter hook output priority 0 ; }
+
+# allow workstations to send ping and initiate connections to any destination
+add rule inet filter forward ip saddr 10.1.0.0/24 icmp type echo-request accept
+add rule inet filter forward ip saddr 10.1.0.0/24 tcp dport 1-65535 accept
+add rule inet filter forward ip saddr 10.1.0.0/24 udp dport 1-65535 accept
+
+# allow DMZ servers to respond to incoming connections
+add rule inet filter forward ip saddr 10.12.0.0/24 ct state established,related accept
+
+# drop any outgoing ping or connection attempt from DMZ servers
+add rule inet filter forward ip saddr 10.12.0.0/24 icmp type echo-request drop
+add rule inet filter forward ip saddr 10.12.0.0/24 tcp dport 1-65535 drop
+add rule inet filter forward ip saddr 10.12.0.0/24 udp dport 1-65535 drop
+
+# allow incoming ping and connection attempts from the Internet only to DMZ servers
+add rule inet filter forward ip daddr 10.12.0.0/24 icmp type echo-request accept
+add rule inet filter forward ip daddr 10.12.0.0/24 tcp dport {80, 20-21} accept
+add rule inet filter forward ip daddr 10.12.0.0/24 udp dport {53, 123} accept
+add rule inet filter forward ip daddr 10.12.0.0/24 counter drop
+
+# drop incoming ping and connection attempts from the Internet to workstations
+add rule inet filter forward ip daddr 10.1.0.0/24 icmp type echo-request drop
+add rule inet filter forward ip daddr 10.1.0.0/24 tcp dport 1-65535 drop
+add rule inet filter forward ip daddr 10.1.0.0/24 udp dport 1-65535 drop

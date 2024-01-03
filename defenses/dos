@@ -1,0 +1,11 @@
+#SYNFLOOD
+add rule inet filter forward ip daddr 10.12.0.0/24 ip protocol tcp limit rate 10/second drop
+#PINGFLOOD
+add rule inet filter forward ip daddr 10.12.0.0/24 ip protocol icmp limit rate 1/second drop
+#PING OF DEATH
+add rule inet filter forward ip protocol icmp ip frag-off > 0 counter drop
+add rule inet filter forward ip protocol icmp icmp type echo-request ip length <= 1024 counter accept
+#REFLECTED DNS ATTACK
+add rule inet filter forward ip protocol udp udp dport 53 limit rate over 1/second burst 5 packets counter drop
+
+add rule inet filter forward ct state established,related counter accept
